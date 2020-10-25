@@ -35,11 +35,12 @@ function addA2FToServicePam
 function addUserToUsersOathFile
 {
     # Generate an A2F seed and add it with username  at the end of the file /etc/users.oath
-    if [ ! -e gen-oath-safe/gen-oath-safe ]; then
-        git clone https://github.com/mcepl/gen-oath-safe.git
+    if [ ! -e ~/gen-oath-safe/gen-oath-safe ]; then
+        git clone https://github.com/mcepl/gen-oath-safe.git ~/gen-oath-safe
     fi
 
-    gen-oath-safe/gen-oath-safe $username totp | tee /tmp/output.txt
+    echo "Scan the QR below or copy and paste the b32 key into a keepass that manages OTP :"
+    ~/gen-oath-safe/gen-oath-safe $username totp | tee /tmp/output.txt
 
     secret=$(tail -n 1 /tmp/output.txt)
     echo $secret >> /etc/users.oath
@@ -73,6 +74,7 @@ if [ -z "$1" ] || [[ "$1" =~ (-h|--help)  ]]; then
         echo "usage: bash $0 [-s service_name|-u username]"
         echo ""
         echo "service_name: service that requires authentication"
+        echo "              Ex: sshd, sudo, ..."
         echo ""
         echo "username: [issuer:]username[@[domain]]"
         echo "          using @ without domain uses"
