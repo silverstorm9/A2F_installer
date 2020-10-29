@@ -48,7 +48,15 @@ function addUserToUsersOathFile
     rm /tmp/output.txt
 }
 
-function installPackages
+function installCentosPackages
+{
+    # Install packages depending on whether they are already installed or not
+    for package in ${packages[*]}; do
+        yum list --installed | grep $package || yum install $package
+    done
+}
+
+function installDebianPackages
 {
     # Install packages depending on whether they are already installed or not
     for package in ${packages[*]}; do
@@ -58,9 +66,23 @@ function installPackages
 
 #################### Tool Initialisation ####################
 
-# Install packages 
-packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode')
-installPackages
+# Get distribution and version ID
+id=$(sudo cat /etc/os-release | grep -E "^ID=(.)*")
+
+# Install packages
+case $id in
+    "ID=ubuntu" | "ID=debian")
+        packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode')
+        installDebianPackages
+    ;;
+    "ID=\"centos\"")
+        packages=('pam_oath' 'oathtool' 'caca-utils' 'qrencode')
+        installCentosPackages
+    ;;
+    *)
+        echo "No packages available for this distribution."
+    ;;
+esac
 
 # Create the file /etc/users.oath that contains each username and their A2F secret (seed)
 if [ ! -e /etc/users.oath ]; then

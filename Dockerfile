@@ -1,3 +1,0 @@
-FROM debian:10.6
-
-EXPOSE 2222
