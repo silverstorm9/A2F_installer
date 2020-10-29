@@ -1,6 +1,11 @@
 # A2F_installer
 Fonctional on Debian/Ubuntu
 
+**Install this tool :**
+
+git clone https://github.com/silverstorm9/A2F_installer.git
+
+
 **Apply TOTP on a service :**
 
 sudo bash ./a2f_installer -s <service>
