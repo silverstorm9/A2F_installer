@@ -73,11 +73,11 @@ id=${id:3}
 # Install packages
 case $id in
     "ubuntu" | "debian")
-        packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode' 'tee')
+        packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode')
         installDebianPackages
     ;;
     ##"\"centos\"")
-    ##    packages=('pam_oath' 'oathtool' 'caca-utils' 'qrencode' 'tee')
+    ##    packages=('pam_oath' 'oathtool' 'caca-utils' 'qrencode')
     ##    installCentosPackages
     #"";;
     *)
