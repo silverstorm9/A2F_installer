@@ -5,6 +5,7 @@ function addA2FToServicePam
     # Add the line: auth required pam_oath.so usersfile=/etc/users.oath window=10 digits=6     at the end of the file /etc/pam.d/$service_name 
     line=$(sudo awk '/auth/ && /required/ && /pam_oath\.so/ && /usersfile=\/etc\/users\.oath/ && /window=10/ && /digits=6/' /etc/pam.d/$service)
     if [ -z "$line" ]; then
+        echo "Add following lines to /etc/pam.d/$service :"
         pamA2F="\n# A2F\nauth required pam_oath.so usersfile=/etc/users.oath window=10 digits=6"
         echo -e $pamA2F | sudo tee -a /etc/pam.d/$service
     fi
@@ -43,6 +44,7 @@ function addUserToUsersOathFile
     ~/gen-oath-safe/gen-oath-safe $username totp | tee /tmp/output.txt
 
     secret=$(tail -n 1 /tmp/output.txt)
+    echo "Add the following line to /etc/users.oath :"
     echo $secret | sudo tee -a /etc/users.oath
 
     rm /tmp/output.txt
