@@ -3,10 +3,10 @@
 function addA2FToServicePam
 {
     # Add the line: auth required pam_oath.so usersfile=/etc/users.oath window=10 digits=6     at the end of the file /etc/pam.d/$service_name 
-    line=$(sudo awk '/auth/ && /required/ && /pam_oath\.so/ && /usersfile=\/etc\/users\.oath/ && /window=10/ && /digits=6/' /etc/pam.d/sshd)
+    line=$(sudo awk '/auth/ && /required/ && /pam_oath\.so/ && /usersfile=\/etc\/users\.oath/ && /window=10/ && /digits=6/' /etc/pam.d/$service)
     if [ -z "$line" ]; then
         pamA2F="\n# A2F\nauth required pam_oath.so usersfile=/etc/users.oath window=10 digits=6"
-        echo -e $pamA2F >> /etc/pam.d/$service
+        echo -e $pamA2F | sudo tee -a /etc/pam.d/$service
     fi
 
     case $service in
@@ -43,24 +43,24 @@ function addUserToUsersOathFile
     ~/gen-oath-safe/gen-oath-safe $username totp | tee /tmp/output.txt
 
     secret=$(tail -n 1 /tmp/output.txt)
-    echo $secret >> /etc/users.oath
+    echo $secret | sudo tee -a /etc/users.oath
 
     rm /tmp/output.txt
 }
 
-function installCentosPackages
-{
-    # Install packages depending on whether they are already installed or not
-    for package in ${packages[*]}; do
-        yum list --installed | grep $package || yum install $package
-    done
-}
+##function installCentosPackages
+##{
+##    # Install packages depending on whether they are already installed or not
+##    for package in ${packages[*]}; do
+##        sudo yum list --installed | grep $package || sudo yum install $package
+##    done
+##}
 
 function installDebianPackages
 {
     # Install packages depending on whether they are already installed or not
     for package in ${packages[*]}; do
-        dpkg -l | grep -qw $package || apt-get install $package
+        sudo dpkg -l | grep -qw $package || sudo apt-get install $package
     done
 }
 
@@ -68,26 +68,27 @@ function installDebianPackages
 
 # Get distribution and version ID
 id=$(sudo cat /etc/os-release | grep -E "^ID=(.)*")
+id=${id:3} 
 
 # Install packages
 case $id in
-    "ID=ubuntu" | "ID=debian")
-        packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode')
+    "ubuntu" | "debian")
+        packages=('libpam-oath' 'oathtool' 'caca-utils' 'qrencode' 'tee')
         installDebianPackages
     ;;
-    "ID=\"centos\"")
-        packages=('pam_oath' 'oathtool' 'caca-utils' 'qrencode')
-        installCentosPackages
-    ;;
+    ##"\"centos\"")
+    ##    packages=('pam_oath' 'oathtool' 'caca-utils' 'qrencode' 'tee')
+    ##    installCentosPackages
+    #"";;
     *)
-        echo "No packages available for this distribution."
+        echo "No packages available for $id."
     ;;
 esac
 
 # Create the file /etc/users.oath that contains each username and their A2F secret (seed)
 if [ ! -e /etc/users.oath ]; then
-    touch /etc/users.oath
-    chmod go-rw /etc/users.oath
+    sudo touch /etc/users.oath
+    sudo chmod go-rw /etc/users.oath
 fi
 
 ############################################################
